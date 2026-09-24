@@ -27,6 +27,7 @@ body {
   color: #4312d7;
   font-size: clamp(36px, 4vw, 65px);
   font-weight: 900;
+  background-color: #171319;
   text-align: center;
   white-space: nowrap;
   pointer-events: none;
