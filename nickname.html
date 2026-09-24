@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>What Do They Call You?</title>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Handjet:wght@100..900&display=swap");
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        padding: 60px 20px;
+
+        background-color: #171319;
+        color: white;
+        font-family: "Handjet", sans-serif;
+
+        border: 20px solid #ff00ff;
+        box-shadow: inset 0 0 0 2px #ffffff;
+
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0 0 40px;
+        color: #4312d7;
+        font-size: clamp(28px, 5vw, 52px);
+        font-weight: 900;
+      }
+
+      h1 a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      h1 a:hover {
+        color: #ff2035;
+      }
+
+      .label {
+        margin: 0 0 16px;
+        font-size: 22px;
+        font-weight: 400;
+      }
+
+      #nameInput {
+        display: block;
+        width: min(420px, 90%);
+        margin: 0 auto 40px;
+        padding: 12px 16px;
+
+        background: transparent;
+        border: 2px solid #ff2035;
+        color: white;
+        font-family: "Handjet", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        outline: none;
+      }
+
+      #nameInput::placeholder {
+        color: white;
+        opacity: 0.8;
+      }
+
+      #status {
+        margin: 0 0 20px;
+        font-size: 18px;
+        color: #a477bb;
+        min-height: 1.2em;
+      }
+
+      #results {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .tag {
+        background: none;
+        border: none;
+        padding: 0;
+        margin: 0;
+
+        color: white;
+        font-family: "Handjet", sans-serif;
+        font-size: 28px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .tag:hover {
+        color: #b17ac4;
+      }
+
+      .star {
+        position: fixed;
+        z-index: 0;
+        color: #a477bb;
+        font-size: 28px;
+        pointer-events: none;
+      }
+
+      .star1 {
+        top: 18%;
+        left: 12%;
+      }
+
+      .star2 {
+        top: 30%;
+        right: 14%;
+      }
+
+      .star3 {
+        top: 55%;
+        left: 18%;
+      }
+
+      .star4 {
+        top: 70%;
+        right: 20%;
+      }
+
+      .star5 {
+        top: 42%;
+        left: 8%;
+      }
+
+      .star6 {
+        top: 80%;
+        left: 70%;
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <span class="star star1">✦</span>
+    <span class="star star2">✦</span>
+    <span class="star star3">✦</span>
+    <span class="star star4">✦</span>
+    <span class="star star5">✦</span>
+    <span class="star star6">✦</span>
+
+    <div class="content">
+      <h1>
+        <a href="index.html">WHAT DO THEY CALL YOU??</a>
+      </h1>
+
+      <p class="label">Enter Name to Find Out</p>
+
+      <input
+        type="text"
+        id="nameInput"
+        placeholder="..."
+        maxlength="60"
+      />
+
+      <p id="status"></p>
+
+      <div id="results"></div>
+    </div>
+
+    <script>
+      const API_URL = "https://studio-name.onrender.com/api/nicknames";
+
+      let nameInput = document.getElementById("nameInput");
+      let resultsDiv = document.getElementById("results");
+      let status = document.getElementById("status");
+
+      // generate nicknames when user presses Enter
+      nameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          fetchNicknames();
+        }
+      });
+
+      async function fetchNicknames() {
+        let name = nameInput.value.trim();
+
+        if (!name) {
+          status.innerText = "Please enter your name!";
+          return;
+        }
+
+        status.innerText = "thinking...";
+        resultsDiv.innerHTML = "";
+
+        try {
+          let url =
+            API_URL +
+            "?name=" +
+            encodeURIComponent(name) +
+            "&vibe=all&count=10";
+
+          let res = await fetch(url);
+
+          if (!res.ok) {
+            throw new Error("Server error");
+          }
+
+          let data = await res.json();
+
+          if (data.success && data.nicknames && data.nicknames.length > 0) {
+            status.innerText = "";
+
+            for (let i = 0; i < data.nicknames.length; i++) {
+              let tag = document.createElement("button");
+              tag.className = "tag";
+              tag.innerText = data.nicknames[i].nickname;
+
+              tag.addEventListener("click", () => {
+                copyNick(data.nicknames[i].nickname);
+              });
+
+              resultsDiv.appendChild(tag);
+            }
+          } else {
+            status.innerText = "No nicknames found. Try again!";
+          }
+        } catch (err) {
+          status.innerText = "Couldn't connect. Please try again.";
+        }
+      }
+
+      async function copyNick(name) {
+        try {
+          await navigator.clipboard.writeText(name);
+          status.innerText = 'Copied "' + name + '"!';
+        } catch (err) {
+          status.innerText = 'Your nickname is "' + name + '"!';
+        }
+      }
+    </script>
+  </body>
+</html>
